@@ -54,6 +54,7 @@ It wouldn't be any good if it depended on a central point of storage, so it won'
 * Donations as fixed or as fraction of a percent of profit. Either way, the trader decides what he or she wishes to contribute back.
 
 **Ideology**
+
 All layers / aspects and core elements of the application must adhere to these proposed principles:
  
 * Open source. Free, forever.
@@ -72,7 +73,7 @@ Until exchanges decentralise, they will remain the weakest link. Regardless, not
  
 **Timeline**
 
-Stage 1 (End of 2017)
+Stage 1 - *ETC: end of 2017*
 
 * Core components: Decentralised local storage etc.
 * Exchange connectors. 
@@ -80,4 +81,4 @@ Stage 1 (End of 2017)
 * Trading fundamental elements. Buy / Sell / Market / Limit / Stop-Sell 
 * Charting fundamentals. 
 
-Stage 2 (2018+):...
+Stage 2 begins 2018.
