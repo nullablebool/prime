@@ -9,9 +9,10 @@ As our community enters the serious and established real-world industry of asset
 None of these tools would be appropriate in our community, they are centralised, high cost and relatively antiquated. 
 
 **What does Prime do?**
-
-|Prime lives on your machine, is ODC, requires no connection with the core developers or anyone else. It is yours, and under your sole control.|
-
+```
+Prime lives on your machine, is ODC, requires no connection with the core developers or anyone else. 
+It is yours, and under your sole control.
+```
 **Trading on any exchange.**
 
 * Connects to all exchanges that support APIs, translating their APIs to a common protocol. Manages new account authorisation establishing the highest-grade of security each exchange offers.
