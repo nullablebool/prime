@@ -32,18 +32,23 @@ None of these tools would be appropriate in our community, they are centralised,
 * *future: ODC reviews: Community feedback -> Who has terrible support? Which exchange is sluggish? Can these people be trusted?
  
 **Charting**
+
 Convenient charting UI - a fast, up-to-second chart based data visualisation tool. Plugins cover indicators, emerging ideas and styles ad infinitum.
  
 **Market Data**
+
 * Service layer constantly populating market data layer, additionally can be accessed by local api.
 * Data is continually managed and stored in decentralised location for quick 'catch-up' data dumps to your platform.
 * Live data as fast as the exchanges can serve it.
  
 **Squawk Box / Troll Box / ODC Instant Messaging**
-If you ask many traders what they use most in Bloomberg, it appears that the communication features are highly valued. Think 'TrollBox'. However, we can do that better - with some basic reputation tools simple optional filtering of noise is possible.
+
+If you ask many traders what they use most in Bloomberg, it appears that the communication features are highly valued. Think **TrollBox**. However, we can do that better - with some basic reputation tools simple optional filtering of noise is possible.
+
 It wouldn't be any good if it depended on a central point of storage, so it won't. This whole feature may well come later, but it's likely to be an integral part of the application going forward.
  
 **Trading Bots & the Plugin Store.**
+
 * Community made trading bots and helpers as isolated / sandboxed plugins. Each granted access via a token that is either auto-generated, or manually determined.
 * Community curated lists of trading plugins - bots / charting styles / satellite apps and services etc. 
 * Convenient reviews of plugins, with reputation indicators, discussion and information.
