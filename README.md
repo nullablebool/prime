@@ -15,6 +15,9 @@ None of these tools would be appropriate in our community, they are centralised,
 Note: Prime lives on your machine, is ODC, requires no connection with the core developers or anyone else. 
 It is yours, and under your sole control.
 ```
+
+## Proposed Features ##
+
 **Trading on any exchange.**
 
 * Connects to all exchanges that support APIs, translating their APIs to a common protocol. Manages new account authorisation establishing the highest-grade of security each exchange offers.
