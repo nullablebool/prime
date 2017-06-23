@@ -77,7 +77,7 @@ All layers / aspects and core elements of the application must adhere to these p
 * All parts configurable via providers for storage layers, encryption layers et al.
 * Multi-platform (starting with WIN) then LIN/OSX/mobile (limited by app store regulations) to follow.
 * Default (but optional) donation model, providing continual revenue streams for core developers, plugin developers. Leveraging the now accessible idea of micropayments through the various crypto assets. 
-* Eg: Pay BTC 0.xxxx a month to your community, or nothing.
+*Eg: Pay BTC 0.xxxx a month to your community, or nothing.*
 * Resilient, regardless of the state of the world - as long as the internet is online, this app should be able to operate.
 Until exchanges decentralise, they will remain the weakest link. Regardless, not having the additional web ui overhead may alleviate their problems considerably. API requests are less taxing than entire page-based payloads.
 * No central authority or dependency.
