@@ -75,7 +75,7 @@ All layers / aspects and core elements of the application must adhere to these p
 * All decentralised, no WEB, no DNS if possible (exceptions for plugins calling apis)
 * All local app db / asset storage decentralised, all encrypted.
 * All parts configurable via providers for storage layers, encryption layers et al.
-* Multi-platform (starting with WIN/LIN/OSX) - mobile apps (limited by app store regulations) to follow.
+* Multi-platform (starting with WIN) then LIN/OSX/mobile (limited by app store regulations) to follow.
 * Default (but optional) donation model, providing continual revenue streams for core developers, plugin developers. Leveraging the now accessible idea of micropayments through the various crypto assets. 
 * Eg: Pay BTC 0.xxxx a month to your community, or nothing.
 * Resilient, regardless of the state of the world - as long as the internet is online, this app should be able to operate.
