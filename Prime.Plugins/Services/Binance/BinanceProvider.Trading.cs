@@ -81,16 +81,6 @@ namespace Prime.Plugins.Services.Binance
             };
         }
 
-        [Obsolete("To be implemented soon.")]
-        public async Task GetDepositHistoryAsync(NetworkProviderPrivateContext context)
-        {
-            var api = ApiProvider.GetApi(context);
-
-            var rRaw = await api.GetDepositHistoryAsync().ConfigureAwait(false);
-
-            // TODO: example is working, will be implemented later.
-        }
-
         public MinimumTradeVolume[] MinimumTradeVolume => throw new NotImplementedException();
 
         // When 22 XRP is submitted - 21.75 will be sent.

@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Prime.Common;
 using Prime.Core;
 using Prime.Plugins.Services.Binance;
+using Prime.Common.Wallet.Deposit.History;
 
 namespace Prime.Tests.Providers
 {
@@ -107,7 +108,7 @@ namespace Prime.Tests.Providers
 
         public async Task TestGetDepositHistory()
         {
-            var context = new NetworkProviderPrivateContext(UserContext.Current);
+            var context = new DepositHistoryContext(UserContext.Current);
             var binanceProvider = new BinanceProvider();
 
             await binanceProvider.GetDepositHistoryAsync(context).ConfigureAwait(false);
