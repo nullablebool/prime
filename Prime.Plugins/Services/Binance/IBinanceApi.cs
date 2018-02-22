@@ -73,6 +73,17 @@ namespace Prime.Plugins.Services.Binance
         /// <returns></returns>
         [Get("/wapi/v3/depositHistory.html")]
         Task<Response<BinanceSchema.DepositHistoryResponse>> GetDepositHistoryAsync([Query] string asset = null, [Query] int? status = null, [Query] long? startTime = null, [Query] long? endTime = null, [Query] long? recvWindow = null);
+        /// <summary>
+        /// Gets the history of deposits to account.
+        /// </summary>
+        /// <param name="asset">Asset which deposit history should be returned.</param>
+        /// <param name="status">Status filter.</param>
+        /// <param name="startTime">Start time.</param>
+        /// <param name="endTime">End time.</param>
+        /// <param name="recvWindow">Request receive window.</param>
+        /// <returns></returns>
+        [Get("/wapi/v3/withdrawHistory.html")]
+        Task<Response<BinanceSchema.WithdrawalHistoryResponse>> GetWitdrawHistoryAsync([Query] string asset = null, [Query] int? status = null, [Query] long? startTime = null, [Query] long? endTime = null, [Query] long? recvWindow = null);
 
         /// <summary>
         /// Submits withdrawal request.

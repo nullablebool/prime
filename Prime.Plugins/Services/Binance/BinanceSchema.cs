@@ -79,6 +79,21 @@ namespace Prime.Plugins.Services.Binance
             public string txId;
             public int status;
         }
+        internal class WithdrawalHistoryResponse : ErrorResponseBase
+        {
+            public WithdrawalListEntryResponse[] withdrawList;
+        }
+
+        internal class WithdrawalListEntryResponse
+        {
+            public string id;
+            public long applyTime;
+            public decimal amount;
+            public string asset;
+            public string address;
+            public string txId;
+            public int status;
+        }
 
         internal class WithdrawalRequestResponse : ErrorResponseBase
         {
