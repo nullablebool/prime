@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using Prime.Utility;
 
-namespace Prime.Common.Wallet.Deposit.History
+namespace Prime.Common
 {
     public class DepositHistoryContext : NetworkProviderPrivateContext
     {
-        public DepositHistoryContext(UserContext userContext, ILogger logger = null) : base(userContext, logger)
+        public DepositHistoryContext(IUserContext userContext, ILogger logger = null) : base(userContext, logger)
         {
+        }
+
+        public DepositHistoryContext(Asset asset, IUserContext userContext, ILogger logger = null) : base(userContext, logger)
+        {
+            this.Asset = asset;
         }
 
         public Asset Asset { get; set; }

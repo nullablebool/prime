@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Prime.Common;
 using Prime.Common.Wallet.Withdrawal.Cancelation;
 using Prime.Common.Wallet.Withdrawal.Confirmation;
-using Prime.Common.Wallet.Withdrawal.History;
 using Prime.Plugins.Services.BitMex;
 
 namespace Prime.Tests.Providers

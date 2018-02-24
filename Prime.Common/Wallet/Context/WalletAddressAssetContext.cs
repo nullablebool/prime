@@ -6,7 +6,7 @@ namespace Prime.Common
     {
         public Asset Asset { get; set; }
 
-        public WalletAddressAssetContext(Asset asset, UserContext userContext, ILogger logger = null) : base(userContext, logger)
+        public WalletAddressAssetContext(Asset asset, IUserContext userContext, ILogger logger = null) : base(userContext, logger)
         {
             Asset = asset;
         }

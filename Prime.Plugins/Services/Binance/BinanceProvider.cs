@@ -1,14 +1,11 @@
-﻿using System;
+﻿using LiteDB;
+using Prime.Common;
+using Prime.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using LiteDB;
-using Prime.Common;
-using Prime.Common.Exchange;
-using Prime.Common.Wallet.Withdrawal.History;
-using Prime.Utility;
-using Prime.Common.Wallet.Deposit.History;
 
 namespace Prime.Plugins.Services.Binance
 {

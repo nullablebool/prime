@@ -1,24 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using LiteDB;
-using Prime.Common;
-using Prime.Common.Exchange;
-using Prime.Common.Wallet.Withdrawal.History;
+﻿using Prime.Common;
 using Prime.Utility;
-using Prime.Common.Wallet.Deposit.History;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Prime.Plugins.Services.Binance
 {
-    public partial class BinanceProvider : IWithdrawalHistoryProvider, IDepositlHistoryProvider
+    public partial class BinanceProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider
     {
-        public async Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context)
+        public async Task<List<TradeHistoryEntry>> GetPrivateTradeHistoryAsync(TradeHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
 
-            var rRaw = await api.GetDepositHistoryAsync().ConfigureAwait(false);
+            var rRaw = await api.GetTradeHistoryAsync(context.AssetPair.ToRemotePair(this)).ConfigureAwait(false);
+            CheckResponseErrors(rRaw);
+
+            var r = rRaw.GetContent();
+
+            var history = new List<TradeHistoryEntry>();
+
+            foreach (var rTrade in r)
+            {
+                history.Add(new TradeHistoryEntry(rTrade.id.ToString(),
+                                                new Money(rTrade.price, context.AssetPair.Asset2),
+                                                new Money(rTrade.qty, context.AssetPair.Asset1),
+                                                new Money(rTrade.commission, Assets.I.Get(rTrade.commissionAsset, this)),
+                                                rTrade.isBuyer,
+                                                rTrade.isMaker,
+                                                rTrade.time.ToUtcDateTime(),
+                                                rTrade.isBestMatch));
+            }
+
+            return history;
+        }
+
+        public async Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context)
+        {
+            var api = ApiProvider.GetApi(context);
+            var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
+            var rRaw = await api.GetDepositHistoryAsync(remoteCode).ConfigureAwait(false);
             CheckResponseErrors(rRaw);
 
             var r = rRaw.GetContent();
@@ -27,11 +46,13 @@ namespace Prime.Plugins.Services.Binance
 
             foreach (var rDeposit in r.depositList)
             {
+                var localAsset = Assets.I.Get(rDeposit.asset, this);
+
                 history.Add(new DepositHistoryEntry()
                 {
-                    Price = new Money(rDeposit.amount, context.Asset),
-                    Fee = new Money(0m, context.Asset), //TODO: Calculate fees using spec
-                    CreatedTimeUtc = (rDeposit.insertTime / 1000).ToUtcDateTime(),
+                    Price = new Money(rDeposit.amount, localAsset),
+                    Fee = new Money(0m, localAsset), //TODO: Calculate fees using spec
+                    CreatedTimeUtc = rDeposit.insertTime.ToUtcDateTime(),
                     Address = rDeposit.address,
                     DepositRemoteId = rDeposit.txId,
                     DepositStatus = rDeposit.status == 0 ? DepositStatus.Confirmed : DepositStatus.Completed
@@ -46,7 +67,7 @@ namespace Prime.Plugins.Services.Binance
             //TODO: Check for supported assets and throw new AssetPairNotSupportedException(context.Asset.ShortCode, this);
 
             var api = ApiProvider.GetApi(context);
-            var remoteCode = context.Asset.ToRemoteCode(this);
+            var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
             var rRaw = await api.GetWitdrawHistoryAsync(remoteCode).ConfigureAwait(false);
             CheckResponseErrors(rRaw);
 
@@ -56,11 +77,13 @@ namespace Prime.Plugins.Services.Binance
 
             foreach (var rHistory in r.withdrawList)
             {
+                var localAsset = Assets.I.Get(rHistory.asset, this);
+
                 history.Add(new WithdrawalHistoryEntry()
                 {
-                    Price = new Money(rHistory.amount, context.Asset),
-                    Fee = new Money(0m, context.Asset), //TODO: Calculate fees using spec
-                    CreatedTimeUtc = (rHistory.applyTime / 1000).ToUtcDateTime(),
+                    Price = new Money(rHistory.amount, localAsset),
+                    Fee = new Money(0m, localAsset), //TODO: Calculate fees using spec
+                    CreatedTimeUtc = rHistory.applyTime.ToUtcDateTime(),
                     Address = rHistory.address,
                     WithdrawalRemoteId = rHistory.txId,
                     WithdrawalStatus = ParseWithdrawalStatus(rHistory.status)

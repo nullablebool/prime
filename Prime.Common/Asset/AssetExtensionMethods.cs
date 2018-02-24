@@ -100,6 +100,14 @@ namespace Prime.Common
             return converter.ToRemoteCode(asset);
         }
 
+        public static string ToRemotePair(this AssetPair assetPair, IDescribesAssets provider)
+        {
+            if (provider == null)
+                throw new ArgumentException(nameof(provider));
+
+            return assetPair.Asset1.ToRemoteCode(provider) + provider.CommonPairSeparator + assetPair.Asset2.ToRemoteCode(provider);
+        }
+
         public static bool IsNone(this Asset asset)
         {
             return asset == null || Equals(asset, Asset.None);

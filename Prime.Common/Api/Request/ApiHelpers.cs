@@ -23,7 +23,7 @@ namespace Prime.Common
                 context.L.Trace("Api: " + provider.Title + " " + name);
                 var response = await t.Invoke().ConfigureAwait(false);
                 context.L.Trace("Api finished @ " + sw.ToElapsed() + " : " + provider.Title + " " + name);
-                if (response!=null)
+                if (response != null)
                     afterSuccess?.Invoke(response);
                 return new ApiResponse<T>(response);
             }

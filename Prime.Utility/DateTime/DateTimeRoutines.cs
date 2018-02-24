@@ -49,8 +49,9 @@ namespace Prime.Utility
         public static DateTime ToUtcDateTime(this long timestamp)
         {
             var time = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            time = time.AddSeconds((double)timestamp);
-
+            //Allow UNIX time in ms too as this precision is more common with trading
+            timestamp = timestamp > 99999999999 ? timestamp : timestamp * 1000; //TODO: Revise code before November 16, 5138
+            time = time.AddMilliseconds(timestamp);
             return time;
         }
 
@@ -522,9 +523,9 @@ namespace Prime.Utility
             }
             else
                 if (year > 30)
-                    year += 1900;
-                else
-                    year += 2000;
+                year += 1900;
+            else
+                year += 2000;
 
             try
             {

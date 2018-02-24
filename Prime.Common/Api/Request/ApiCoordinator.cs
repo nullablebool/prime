@@ -74,5 +74,17 @@ namespace Prime.Common
         {
             return AsyncContext.Run(() => GetOrderBookAsync(provider, context));
         }
+        public static ApiResponse<List<DepositHistoryEntry>> GetDepositHistory(IDepositHistoryProvider provider, DepositHistoryContext context)
+        {
+            return AsyncContext.Run(() => GetDepositHistoryAsync(provider, context));
+        }
+        public static ApiResponse<List<DepositHistoryEntry>> GetWithdrawHistory(IDepositHistoryProvider provider, DepositHistoryContext context)
+        {
+            return AsyncContext.Run(() => GetDepositHistoryAsync(provider, context));
+        }
+        public static ApiResponse<List<TradeHistoryEntry>> GetPrivateTradeHistory(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
+        {
+            return AsyncContext.Run(() => GetPrivateTradeHistoryAsync(provider, context));
+        }
     }
 }

@@ -15,7 +15,7 @@ using Prime.Common.Wallet;
 
 namespace Prime.Common
 {
-    public class UserContext : IDataContext, IDisposable
+    public class UserContext : IDataContext, IDisposable, IUserContext
     {
         public static string Version = "v0.02";
 
