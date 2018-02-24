@@ -156,6 +156,21 @@ namespace Prime.Plugins.Services.Binance
             }
         }
 
+        internal class TradeResponse
+        {
+            public int id;
+            public decimal price;
+            public decimal qty;
+            public decimal commission;
+            public string commissionAsset;
+            public long time;
+            public bool isBuyer;
+            public bool isMaker;
+            public bool isBestMatch;
+        }
+
+        internal class TradeListResponse : List<TradeResponse> { }
+
         #endregion
     }
 }

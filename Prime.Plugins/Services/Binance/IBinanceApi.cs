@@ -124,5 +124,16 @@ namespace Prime.Plugins.Services.Binance
         /// <returns></returns>
         [Get("/api/v1/ping")]
         Task<Response<object>> PingAsync();
+
+        /// <summary>
+        /// Gets the trade history of an account for a given asset.
+        /// </summary>
+        /// <param name="symbol">Currency pair code being queried.</param>
+        /// <param name="limit">Limits the number of trades to be returned. Default: 500, Max: 500</param>
+        /// <param name="fromId">TradeId to fetch from. Default gets most recent trades.</param>
+        /// <param name="recvWindow">Request receive window.</param>
+        /// <returns>Array of trades.</returns>
+        [Get("/api/v3/myTrades")]
+        Task<Response<IEnumerable<BinanceSchema.TradeResponse>>> GetTradeHistoryAsync([Query] string symbol, [Query] int? limit = null, [Query] long? fromId = null, [Query] int? recvWindow = null);
     }
 }

@@ -7,7 +7,6 @@ using Nito.AsyncEx;
 using Prime.Common;
 using Prime.Common.Wallet.Withdrawal.Cancelation;
 using Prime.Common.Wallet.Withdrawal.Confirmation;
-using Prime.Common.Wallet.Withdrawal.History;
 
 namespace Prime.Tests.Providers
 {

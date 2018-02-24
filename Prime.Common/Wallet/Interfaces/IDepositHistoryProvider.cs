@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Prime.Common.Wallet.Deposit.History;
 
 namespace Prime.Common
 {
-    public interface IDepositlHistoryProvider
+    public interface IDepositHistoryProvider : INetworkProviderPrivate
     {
         Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context);
     }

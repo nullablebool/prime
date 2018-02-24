@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Prime.Common.Wallet.Withdrawal.History;
 
 namespace Prime.Common
 {
-    public interface IWithdrawalHistoryProvider
+    public interface IWithdrawalHistoryProvider : INetworkProviderPrivate
     {
         Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context);
     }

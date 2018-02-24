@@ -55,6 +55,15 @@ namespace Prime.Common
 
         private IReadOnlyList<ICoinSnapshotAggregationProvider> _apaggProviders;
         public IReadOnlyList<ICoinSnapshotAggregationProvider> AssetPairAggregationProviders => _apaggProviders ?? (_apaggProviders = Providers.OfList<ICoinSnapshotAggregationProvider>());
+        
+        private IReadOnlyList<IDepositHistoryProvider> _depositHistoryProviders;
+        public IReadOnlyList<IDepositHistoryProvider> DepositHistoryProviders => _depositHistoryProviders ?? (_depositHistoryProviders = Providers.OfList<IDepositHistoryProvider>());
+
+        private IReadOnlyList<IWithdrawalHistoryProvider> _withdrawHistoryProviders;
+        public IReadOnlyList<IWithdrawalHistoryProvider> WithdrawalHistoryProviders => _withdrawHistoryProviders ?? (_withdrawHistoryProviders = Providers.OfList<IWithdrawalHistoryProvider>());
+
+        private IReadOnlyList<IPrivateTradeHistoryProvider> _privateTradeHistoryProviders;
+        public IReadOnlyList<IPrivateTradeHistoryProvider> PrivateTradeHistoryProviders => _privateTradeHistoryProviders ?? (_privateTradeHistoryProviders = Providers.OfList<IPrivateTradeHistoryProvider>());
 
         public IEnumerator<Network> GetEnumerator()
         {
