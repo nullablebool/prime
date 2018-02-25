@@ -23,7 +23,7 @@
     <Compile Remove="Wallet\Interfaces\Withdrawal\IWithdrawalPlacementProviderExtended.cs" />
     <Compile Remove="Wallet\Withdrawal\Placement\WithdrawalPlacementContextExtended.cs" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Nito.AsyncEx" Version="5.0.0-pre-05" />
@@ -42,7 +42,6 @@
 
   <ItemGroup>
     <Folder Include="DataLayer\Resolution\" />
-    <Folder Include="Reporting\" />
     <Folder Include="Wallet\Trade\" />
   </ItemGroup>
 

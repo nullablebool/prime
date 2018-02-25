@@ -82,7 +82,7 @@ namespace Prime.Common
         {
             return AsyncContext.Run(() => GetDepositHistoryAsync(provider, context));
         }
-        public static ApiResponse<List<TradeHistoryEntry>> GetPrivateTradeHistory(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
+        public static ApiResponse<TradeOrders> GetPrivateTradeHistory(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
         {
             return AsyncContext.Run(() => GetPrivateTradeHistoryAsync(provider, context));
         }

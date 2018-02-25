@@ -108,7 +108,7 @@ namespace Prime.Common
         {
             return ApiHelpers.WrapExceptionAsync(() => provider.GetWithdrawalHistoryAsync(context), nameof(GetWithdrawHistoryAsync), provider, context);
         }
-        public static Task<ApiResponse<List<TradeHistoryEntry>>> GetPrivateTradeHistoryAsync(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
+        public static Task<ApiResponse<TradeOrders>> GetPrivateTradeHistoryAsync(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
         {
             return ApiHelpers.WrapExceptionAsync(() => provider.GetPrivateTradeHistoryAsync(context), nameof(GetPrivateTradeHistory), provider, context);
         }

@@ -1,36 +1,60 @@
 ﻿using Prime.Common;
+using Prime.Common.Reporting;
 using Prime.Utility;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Prime.Plugins.Services.Binance
 {
     public partial class BinanceProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider
     {
-        public async Task<List<TradeHistoryEntry>> GetPrivateTradeHistoryAsync(TradeHistoryContext context)
+        public async Task<TradeOrders> GetPrivateTradeHistoryAsync(TradeHistoryContext context)
+        {
+            if (context.AssetPair == null) return await GetPrivateTradeHistorySingleAsync(context).ConfigureAwait(false);
+
+            var api = ApiProvider.GetApi(context);
+
+            var validTradePairsStrategy = new ProbableTradePairsDiscovery<BinanceProvider>(this);
+
+            var validTradePairs = await validTradePairsStrategy.GetKnownTradePairs(context);
+
+            var allTradeRequestTasks = new ConcurrentBag<TradeOrders>();
+
+            await validTradePairs.ForEachAsync(async pair =>
+            {
+                var tradeOrders = await GetPrivateTradeHistorySingleAsync(new TradeHistoryContext(context.UserContext, pair));
+                allTradeRequestTasks.Add(tradeOrders);
+            }, 5);
+
+            var aggregatedTradeOrders = new TradeOrders(Network);
+            allTradeRequestTasks.SelectMany(s => s).ForEach(s => aggregatedTradeOrders.Add(s));
+            return aggregatedTradeOrders;
+        }
+
+        private async Task<TradeOrders> GetPrivateTradeHistorySingleAsync(TradeHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
 
-            var rRaw = await api.GetTradeHistoryAsync(context.AssetPair.ToRemotePair(this)).ConfigureAwait(false);
+            var rRaw = await api.GetTradeHistoryAsync(context.AssetPair.ToTicker(this)).ConfigureAwait(false);
             CheckResponseErrors(rRaw);
 
             var r = rRaw.GetContent();
 
-            var history = new List<TradeHistoryEntry>();
+            var orders = new TradeOrders(Network);
 
-            foreach (var rTrade in r)
+            foreach (var order in r)
             {
-                history.Add(new TradeHistoryEntry(rTrade.id.ToString(),
-                                                new Money(rTrade.price, context.AssetPair.Asset2),
-                                                new Money(rTrade.qty, context.AssetPair.Asset1),
-                                                new Money(rTrade.commission, Assets.I.Get(rTrade.commissionAsset, this)),
-                                                rTrade.isBuyer,
-                                                rTrade.isMaker,
-                                                rTrade.time.ToUtcDateTime(),
-                                                rTrade.isBestMatch));
+                orders.Add(new TradeOrder(order.id.ToString(), Network, context.AssetPair, order.isBuyer ? TradeOrderType.LimitBuy : TradeOrderType.LimitSell, order.price)
+                {
+                    Quantity = order.qty,
+                    Closed = order.time.ToUtcDateTime(),
+                    CommissionPaid = new Money(order.commission, Assets.I.Get(order.commissionAsset, this))
+                });
             }
 
-            return history;
+            return orders;
         }
 
         public async Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context)
@@ -54,7 +78,7 @@ namespace Prime.Plugins.Services.Binance
                     Fee = new Money(0m, localAsset), //TODO: Calculate fees using spec
                     CreatedTimeUtc = rDeposit.insertTime.ToUtcDateTime(),
                     Address = rDeposit.address,
-                    DepositRemoteId = rDeposit.txId,
+                    TxId = rDeposit.txId,
                     DepositStatus = rDeposit.status == 0 ? DepositStatus.Confirmed : DepositStatus.Completed
                 });
             }
@@ -64,8 +88,6 @@ namespace Prime.Plugins.Services.Binance
 
         public async Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
         {
-            //TODO: Check for supported assets and throw new AssetPairNotSupportedException(context.Asset.ShortCode, this);
-
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
             var rRaw = await api.GetWitdrawHistoryAsync(remoteCode).ConfigureAwait(false);
@@ -85,7 +107,8 @@ namespace Prime.Plugins.Services.Binance
                     Fee = new Money(0m, localAsset), //TODO: Calculate fees using spec
                     CreatedTimeUtc = rHistory.applyTime.ToUtcDateTime(),
                     Address = rHistory.address,
-                    WithdrawalRemoteId = rHistory.txId,
+                    TxId = rHistory.txId,
+                    WithdrawalRemoteId = rHistory.id,
                     WithdrawalStatus = ParseWithdrawalStatus(rHistory.status)
                 });
             }

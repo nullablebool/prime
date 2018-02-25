@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace Prime.Utility
             for (var i = 0; i < 115; i++)
             {
                 maxThread.Wait();
-                Task.Factory.StartNew(() => {  }).ContinueWith(task => maxThread.Release());
+                Task.Factory.StartNew(() => { }).ContinueWith(task => maxThread.Release());
             }
             return Task.CompletedTask;
         }
@@ -31,6 +32,18 @@ namespace Prime.Utility
         public static Task ForEachAsync<T>(this IEnumerable<T> sequence, Func<T, Task> action)
         {
             return Task.WhenAll(sequence.Select(action));
+        }
+
+        public static Task ForEachAsync<T>(this IEnumerable<T> sequence, Func<T, Task> action, int maxDegreeOfParellism, Action<Task> continuation = null)
+        {
+            var parallelTasks = Partitioner.Create(sequence).GetPartitions(maxDegreeOfParellism).Select(s => Task.Run(async delegate
+            {
+                using (s)
+                    while (s.MoveNext())
+                        await action(s.Current).ContinueWith(t => continuation ?? delegate { });
+             }));
+
+            return Task.WhenAll(parallelTasks);
         }
     }
 }

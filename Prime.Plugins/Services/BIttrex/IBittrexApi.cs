@@ -52,5 +52,17 @@ namespace Prime.Plugins.Services.Bittrex
 
         [Get("/account/getorderhistory")]
         Task<BittrexSchema.GetOrderHistoryResponse> GetAccountHistory([Query] string currencyPair = null);
+
+        [Get("/account/getbalances")]
+        Task<BittrexSchema.GetOrderHistoryResponse> GetBalancesAsync([Query] string currencyPair = null);
+
+        [Get("/account/getdeposithistory")]
+        Task<BittrexSchema.GetDepositHistoryResponse> GetDepositHistoryAsync([Query] string currencyPair = null);
+
+        [Get("/account/getwithdrawalhistory")]
+        Task<BittrexSchema.GetWithdrawalHistoryResponse> GetWithdrawHistoryAsync([Query] string currencyPair = null);
+
+        [Get("/public/getcurrencies")]
+        Task<BittrexSchema.GetCurrenciesResponse> GetCurrenciesAsync([Query] string currencyPair = null);
     }
 }

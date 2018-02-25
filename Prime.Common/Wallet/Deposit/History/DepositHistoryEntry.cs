@@ -5,6 +5,7 @@ namespace Prime.Common
     public class DepositHistoryEntry
     {
         public string DepositRemoteId { get; set; }
+        public string TxId { get; set; }
         public Money Price { get; set; }
         public string Address { get; set; }
         public Money Fee { get; set; }

@@ -156,5 +156,129 @@ namespace Prime.Plugins.Services.Bittrex
             public string Currency;
             public string Address;
         }
+
+        internal class GetWithdrawalHistoryResponse : BaseResponse<Withdrawal[]> { }
+
+        internal class Withdrawal 
+        {
+            /// <summary>
+            /// Guid of the payment
+            /// </summary>
+            public Guid PaymentUuid { get; set; }
+            /// <summary>
+            /// Currency of the withdrawal
+            /// </summary>
+            public string Currency { get; set; }
+            /// <summary>
+            /// Amount of the withdrawal
+            /// </summary>
+            public decimal Amount { get; set; }
+            /// <summary>
+            /// Address the withdrawal is to
+            /// </summary>
+            public string Address { get; set; }
+            /// <summary>
+            /// Timestamp when withdrawal was opened
+            /// </summary>
+            public DateTime Opened { get; set; }
+            /// <summary>
+            /// Whether the withdrawal is authorized
+            /// </summary>
+            public bool Authorized { get; set; }
+            /// <summary>
+            /// Whether there is pending payment
+            /// </summary>
+            public bool PendingPayment { get; set; }
+            /// <summary>
+            /// Cost of the transaction
+            /// </summary>
+            public decimal TxCost { get; set; }
+            /// <summary>
+            /// Id of the transaction
+            /// </summary>
+            public string TxId { get; set; }
+            /// <summary>
+            /// Whether the withdrawal is canceled
+            /// </summary>
+            public bool Canceled { get; set; }
+            /// <summary>
+            /// Whether the withdrawal is to an invalid address
+            /// </summary>
+            public bool InvalidAddress { get; set; }
+        }
+
+        internal class GetDepositHistoryResponse : BaseResponse<Deposit[]> { }
+
+        internal class Deposit
+        {
+                /// <summary>
+                /// The id of the deposit
+                /// </summary>
+                public long Id { get; set; }
+                /// <summary>
+                /// The amount of the deposit
+                /// </summary>
+                public decimal Amount { get; set; }
+                /// <summary>
+                /// The currency of the deposit
+                /// </summary>
+                public string Currency { get; set; }
+                /// <summary>
+                /// The current number of confirmations the deposit has
+                /// </summary>
+                public int Confirmations { get; set; }
+                /// <summary>
+                /// Timestamp of the last update
+                /// </summary>
+                public DateTime LastUpdated { get; set; }
+                /// <summary>
+                /// Transaction id of the deposit
+                /// </summary>
+                public string TxId { get; set; }
+                /// <summary>
+                /// The address the deposit is to
+                /// </summary>
+                public string CryptoAddress { get; set; }
+            
+        }
+
+        internal class GetCurrenciesResponse : BaseResponse<CurrencyItem[]> { }
+
+        internal class CurrencyItem
+        {
+            /// <summary>
+            /// The abbreviation of the currency
+            /// </summary>
+            public string Currency { get; set; }
+            /// <summary>
+            /// The full name of the currency
+            /// </summary>
+            public string CurrencyLong { get; set; }
+            /// <summary>
+            /// The minimum number of confirmations before a deposit is added to a account
+            /// </summary>
+            public int MinConfirmation { get; set; }
+            /// <summary>
+            /// The transaction fee for a currency
+            /// </summary>
+            public decimal TxFee { get; set; }
+            /// <summary>
+            /// Whether the currency is currently active
+            /// </summary>
+            public bool IsActive { get; set; }
+            /// <summary>
+            /// The base coin type
+            /// </summary>
+            public string CoinType { get; set; }
+            /// <summary>
+            /// The base address
+            /// </summary>
+            public string BaseAddress { get; set; }
+            /// <summary>
+            /// Additional information about the state of this currency
+            /// </summary>
+            public string Notice { get; set; }
+        }
+
     }
 }

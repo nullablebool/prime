@@ -5,6 +5,6 @@ namespace Prime.Common
 {
     public interface IPrivateTradeHistoryProvider : INetworkProviderPrivate
     {
-        Task<List<TradeHistoryEntry>> GetPrivateTradeHistoryAsync(TradeHistoryContext context);
+        Task<TradeOrders> GetPrivateTradeHistoryAsync(TradeHistoryContext context);
     }
 }
