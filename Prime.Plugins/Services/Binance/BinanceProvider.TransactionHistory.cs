@@ -8,11 +8,16 @@ using System.Collections.Concurrent;
 
 namespace Prime.Plugins.Services.Binance
 {
-    public partial class BinanceProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider
+    public partial class BinanceProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider, IPublicPricingBulkProvider
     {
+        public async Task<MarketPrices> GetPricingBulkAsync(NetworkProviderContext context)
+        {
+            return await GetPricesAsync(new PublicPricesContext(context.L)).ConfigureAwait(false);
+        }
+
         public async Task<TradeOrders> GetPrivateTradeHistoryAsync(TradeHistoryContext context)
         {
-            if (context.AssetPair == null) return await GetPrivateTradeHistorySingleAsync(context).ConfigureAwait(false);
+            if (context.AssetPair != null) return await GetPrivateTradeHistorySingleAsync(context).ConfigureAwait(false);
 
             var api = ApiProvider.GetApi(context);
 
@@ -46,18 +51,19 @@ namespace Prime.Plugins.Services.Binance
 
             foreach (var order in r)
             {
-                orders.Add(new TradeOrder(order.id.ToString(), Network, context.AssetPair, order.isBuyer ? TradeOrderType.LimitBuy : TradeOrderType.LimitSell, order.price)
+                orders.Add(new TradeOrder(order.id.ToString(), Network, context.AssetPair, order.isBuyer ? TradeOrderType.LimitBuy : TradeOrderType.LimitSell, order.price * order.qty)
                 {
                     Quantity = order.qty,
                     Closed = order.time.ToUtcDateTime(),
-                    CommissionPaid = new Money(order.commission, Assets.I.Get(order.commissionAsset, this))
+                    CommissionPaid = new Money(order.commission, Assets.I.Get(order.commissionAsset, this)),
+                    PricePerUnit = new Money(order.price, context.AssetPair.Asset2)
                 });
             }
 
             return orders;
         }
 
-        public async Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context)
+        public async Task<DepositHistory> GetDepositHistoryAsync(DepositHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
@@ -66,7 +72,7 @@ namespace Prime.Plugins.Services.Binance
 
             var r = rRaw.GetContent();
 
-            var history = new List<DepositHistoryEntry>();
+            var history = new DepositHistory(this);
 
             foreach (var rDeposit in r.depositList)
             {
@@ -86,7 +92,7 @@ namespace Prime.Plugins.Services.Binance
             return history;
         }
 
-        public async Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
+        public async Task<WithdrawalHistory> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
@@ -95,7 +101,7 @@ namespace Prime.Plugins.Services.Binance
 
             var r = rRaw.GetContent();
 
-            var history = new List<WithdrawalHistoryEntry>();
+            var history = new WithdrawalHistory(this);
 
             foreach (var rHistory in r.withdrawList)
             {

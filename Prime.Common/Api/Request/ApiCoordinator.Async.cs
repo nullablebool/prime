@@ -100,17 +100,24 @@ namespace Prime.Common
             return ApiHelpers.WrapExceptionAsync(() => provider.GetOrderBookAsync(context), nameof(GetOrderBook), provider, context);
         }
 
-        public static Task<ApiResponse<List<DepositHistoryEntry>>> GetDepositHistoryAsync(IDepositHistoryProvider provider, DepositHistoryContext context)
+        public static Task<ApiResponse<DepositHistory>> GetDepositHistoryAsync(IDepositHistoryProvider provider, DepositHistoryContext context)
         {
-            return ApiHelpers.WrapExceptionAsync(() => provider.GetDepositHistoryAsync(context), nameof(GetDepositHistoryAsync), provider, context);
+            return ApiHelpers.WrapExceptionAsync(() => provider.GetDepositHistoryAsync(context), nameof(GetDepositHistory), provider, context);
         }
-        public static Task<ApiResponse<List<WithdrawalHistoryEntry>>> GetWithdrawHistoryAsync(IWithdrawalHistoryProvider provider, WithdrawalHistoryContext context)
+
+        public static Task<ApiResponse<WithdrawalHistory>> GetWithdrawHistoryAsync(IWithdrawalHistoryProvider provider, WithdrawalHistoryContext context)
         {
-            return ApiHelpers.WrapExceptionAsync(() => provider.GetWithdrawalHistoryAsync(context), nameof(GetWithdrawHistoryAsync), provider, context);
+            return ApiHelpers.WrapExceptionAsync(() => provider.GetWithdrawalHistoryAsync(context), nameof(GetWithdrawHistory), provider, context);
         }
+
         public static Task<ApiResponse<TradeOrders>> GetPrivateTradeHistoryAsync(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
         {
             return ApiHelpers.WrapExceptionAsync(() => provider.GetPrivateTradeHistoryAsync(context), nameof(GetPrivateTradeHistory), provider, context);
+        }
+
+        public static Task<ApiResponse<MarketPrices>> GetPricingBulkAsync(IPublicPricingBulkProvider provider, NetworkProviderContext context)
+        {
+            return ApiHelpers.WrapExceptionAsync(() => provider.GetPricingBulkAsync(context), nameof(GetPricingBulk), provider, context);
         }
     }
 }

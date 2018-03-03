@@ -22,5 +22,11 @@ namespace Prime.Plugins.Services.Cex
 
         [Get("/order_book/{currencyPair}/?depth={depth}")]
         Task<CexSchema.OrderBookResponse> GetOrderBookAsync([Path(UrlEncode = false)] string currencyPair, [Path] int? depth = null);
+
+        [Post("/balance/")]
+        Task<CexSchema.BalancesResponseDynamic> GetAccountBalancesAsync();
+
+        [Post("/archived_orders/{symbol1}/{symbol2}")]
+        Task<CexSchema.OrderResponseList> GetTradeHistoryAsync([Path] string symbol1, [Path] string symbol2);
     }
 }

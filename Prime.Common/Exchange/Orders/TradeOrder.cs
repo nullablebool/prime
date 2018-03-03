@@ -69,6 +69,8 @@ namespace Prime.Common
         [Bson]
         public string ConditionTarget {get; set;}
 
+        [Bson]
+        public string FundingSource { get; set; }
         public override string ToString()
         {
             return $"{RemoteOrderId} {Network.Name} {Pair} {Quantity} {Price}";

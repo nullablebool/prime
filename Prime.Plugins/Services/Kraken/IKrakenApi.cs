@@ -7,13 +7,22 @@ namespace Prime.Plugins.Services.Kraken
     internal interface IKrakenApi
     {
         [Post("/private/Balance")]
-        Task<KrakenSchema.BalancesResponse> GetBalancesAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body);
+        Task<KrakenSchema.BalancesResponse> GetBalancesAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body = null);
 
         [Post("/private/DepositMethods")]
-        Task<KrakenSchema.DepositMethodsResponse> GetDepositMethodsAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body);
+        Task<KrakenSchema.DepositMethodsResponse> GetDepositMethodsAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body = null);
 
         [Post("/private/DepositAddresses")]
-        Task<KrakenSchema.DepositAddressesResponse> GetDepositAddressesAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body);
+        Task<KrakenSchema.DepositAddressesResponse> GetDepositAddressesAsync([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body = null);
+
+        [Post("/private/Ledgers")]
+        Task<KrakenSchema.LedgersInfoResponse> GetLedgerInfo([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body = null);
+
+        [Post("/private/TradesHistory")]
+        Task<KrakenSchema.TradeHistoryResponse> GetTradesHistory([Body(BodySerializationMethod.UrlEncoded)] Dictionary<string, object> body= null);
+
+        [Get("/public/Assets")]
+        Task<KrakenSchema.AssetsResponse> GetAssetsAsync();
 
         [Get("/public/AssetPairs")]
         Task<KrakenSchema.AssetPairsResponse> GetAssetPairsAsync();

@@ -69,9 +69,8 @@ namespace Prime.Plugins.Services.Kraken
         public async Task<bool> TestPrivateApiAsync(ApiPrivateTestContext context)
         {
             var api = ApiProvider.GetApi(context);
-            var body = CreateKrakenBody();
 
-            var r = await api.GetBalancesAsync(body).ConfigureAwait(false);
+            var r = await api.GetBalancesAsync().ConfigureAwait(false);
 
             CheckResponseErrors(r);
 
@@ -84,7 +83,7 @@ namespace Prime.Plugins.Services.Kraken
         };
 
         public PricingFeatures PricingFeatures => StaticPricingFeatures;
-
+        
         public async Task<MarketPrices> GetPricingAsync(PublicPricesContext context)
         {
             var api = ApiProvider.GetApi(context);
@@ -118,6 +117,7 @@ namespace Prime.Plugins.Services.Kraken
             return prices;
         }
 
+        //TODO: Would it not be better doing this by loading AssetPairs and Assets(for alt names) and creating a map? This map should be persisted/cached for the IAssetCodeConverter to consume.
         private bool ComparePairs(AssetPair pair, string krakenPairCode)
         {
             var result = false;
@@ -194,16 +194,6 @@ namespace Prime.Plugins.Services.Kraken
             return rAsset;
         }
 
-        private Dictionary<string, object> CreateKrakenBody()
-        {
-            var body = new Dictionary<string, object>();
-            var nonce = BaseAuthenticator.GetLongNonce();
-
-            body.Add("nonce", nonce);
-
-            return body;
-        }
-
         private void CheckResponseErrors(KrakenSchema.ErrorResponse response)
         {
             if (response.error.Length > 0)
@@ -221,12 +211,12 @@ namespace Prime.Plugins.Services.Kraken
         {
             var api = ApiProvider.GetApi(context);
 
-            var body = CreateKrakenBody();
+            var body = new Dictionary<string, object>(); //TODO: Encapsulate these params into ContextObject
             body.Add("asset", asset.ToRemoteCode(this));
 
             try
             {
-                var r = await api.GetDepositMethodsAsync(body).ConfigureAwait(false);
+                var r = await api.GetDepositMethodsAsync().ConfigureAwait(false);
 
                 CheckResponseErrors(r);
 
@@ -246,7 +236,7 @@ namespace Prime.Plugins.Services.Kraken
 
         private async Task<WalletAddresses> GetAddressesLocalAsync(IKrakenApi api, string fundingMethod, Asset asset, bool generateNew = false)
         {
-            var body = CreateKrakenBody();
+            var body = new Dictionary<string, object>(); //TODO: Encapsulate these params into ContextObject
 
             // BUG: do we need "aclass"?
             //body.Add("aclass", asset.ToRemoteCode(this));

@@ -6,21 +6,26 @@ using System.Linq;
 
 namespace Prime.Plugins.Services.Bittrex
 {
-    public partial class BittrexProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider
+    public partial class BittrexProvider : IWithdrawalHistoryProvider, IDepositHistoryProvider, IPrivateTradeHistoryProvider, IPublicPricingBulkProvider
     {
+        public async Task<MarketPrices> GetPricingBulkAsync(NetworkProviderContext context)
+        {
+            return await GetPricesAsync(new PublicPricesContext(context.L)).ConfigureAwait(false);
+        }
+
         public async Task<TradeOrders> GetPrivateTradeHistoryAsync(TradeHistoryContext context)
         {
             return await GetOrderHistoryAsync(new PrivatePairContext(context.UserContext)).ConfigureAwait(false);
         }
 
-        public async Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context)
+        public async Task<DepositHistory> GetDepositHistoryAsync(DepositHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
             var depositHistoryResponse = await api.GetDepositHistoryAsync(remoteCode).ConfigureAwait(false);
             CheckResponseErrors(depositHistoryResponse);
 
-            var history = new List<DepositHistoryEntry>();
+            var history = new DepositHistory(this);
             if (depositHistoryResponse.result.Length == 0) return history;
 
             var currencies = await GetCurrencies(context);
@@ -43,14 +48,14 @@ namespace Prime.Plugins.Services.Bittrex
             return history;
         }
 
-        public async Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
+        public async Task<WithdrawalHistory> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
         {
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset == null ? null : context.Asset.ToRemoteCode(this);
             var withdrawalHistoryResponse = await api.GetWithdrawHistoryAsync(remoteCode).ConfigureAwait(false);
             CheckResponseErrors(withdrawalHistoryResponse);
 
-            var history = new List<WithdrawalHistoryEntry>();
+            var history = new WithdrawalHistory(this);
             if (withdrawalHistoryResponse.result.Length == 0) return history;
 
             foreach (var withdraw in withdrawalHistoryResponse.result)

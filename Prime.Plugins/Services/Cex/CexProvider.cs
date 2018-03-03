@@ -11,7 +11,7 @@ namespace Prime.Plugins.Services.Cex
 {
     // https://cex.io/rest-api#public
     /// <author email="yasko.alexander@gmail.com">Alexander Yasko</author>
-    public class CexProvider : IPublicPricingProvider, IAssetPairsProvider, IPublicVolumeProvider, IOrderBookProvider
+    public partial class CexProvider : IPublicPricingProvider, IAssetPairsProvider, IPublicVolumeProvider, IOrderBookProvider, IBalanceProvider
     {
         private const string CexApiUrl = "https://cex.io/api";
 
@@ -62,9 +62,16 @@ namespace Prime.Plugins.Services.Cex
 
         public CexProvider()
         {
-            ApiProvider = new RestApiClientProvider<ICexApi>(CexApiUrl, this, k => null);
+            ApiProvider = new RestApiClientProvider<ICexApi>(CexApiUrl, this, k => new CexAuthenticator(k).GetRequestModifierAsync);
         }
 
+        public ApiConfiguration GetApiConfiguration => ApiConfiguration.Standard3;
+        public async Task<bool> TestPrivateApiAsync(ApiPrivateTestContext context)
+        {
+            var api = ApiProvider.GetApi(context);
+            var r = await api.GetAccountBalancesAsync().ConfigureAwait(false); 
+            return !r.IsFailed;
+        }
         public async Task<bool> TestPublicApiAsync(NetworkProviderContext context)
         {
             var r = await GetAssetPairsAsync(context).ConfigureAwait(false);
@@ -149,6 +156,12 @@ namespace Prime.Plugins.Services.Cex
                 throw new ApiResponseException($"Error occurred in provider - {response.ok}", this);
         }
 
+        private void CheckResponseErrors(CexSchema.PrivateBaseResponse response)
+        {
+            if (response.IsFailed)
+                throw new ApiResponseException($"Error occurred in provider. {response.Error}", this);
+        }
+
         public async Task<PublicVolumeResponse> GetVolumeAsync(PublicVolumesContext context)
         {
             var api = ApiProvider.GetApi(context);
@@ -194,6 +207,25 @@ namespace Prime.Plugins.Services.Cex
                 return await GetVolumeAsync(context).ConfigureAwait(false);
 
             return await GetVolumesAsync(context).ConfigureAwait(false);
+        }
+
+        public async Task<BalanceResults> GetBalancesAsync(NetworkProviderPrivateContext context)
+        {
+            var api = ApiProvider.GetApi(context);
+
+            var r = await api.GetAccountBalancesAsync().ConfigureAwait(false);
+
+            CheckResponseErrors(r);
+
+            var balances = new BalanceResults(this);
+
+            foreach (var rBalance in r.Balances)
+            {
+                var asset = rBalance.Key.ToAsset(this);
+                balances.Add(asset, rBalance.Value.Available ?? 0m, rBalance.Value.Orders ?? 0m);
+            }
+
+            return balances;
         }
 
         private static readonly VolumeFeatures StaticVolumeFeatures = new VolumeFeatures()

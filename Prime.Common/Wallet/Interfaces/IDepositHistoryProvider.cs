@@ -5,6 +5,6 @@ namespace Prime.Common
 {
     public interface IDepositHistoryProvider : INetworkProviderPrivate
     {
-        Task<List<DepositHistoryEntry>> GetDepositHistoryAsync(DepositHistoryContext context);
+        Task<DepositHistory> GetDepositHistoryAsync(DepositHistoryContext context);
     }
 }

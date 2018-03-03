@@ -5,6 +5,6 @@ namespace Prime.Common
 {
     public interface IWithdrawalHistoryProvider : INetworkProviderPrivate
     {
-        Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context);
+        Task<WithdrawalHistory> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context);
     }
 }

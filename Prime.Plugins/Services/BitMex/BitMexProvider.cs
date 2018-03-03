@@ -328,7 +328,7 @@ namespace Prime.Plugins.Services.BitMex
             };
         }
 
-        public async Task<List<WithdrawalHistoryEntry>> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
+        public async Task<WithdrawalHistory> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
         {
             if (!context.Asset.ToRemoteCode(this).Equals(Asset.Btc.ToRemoteCode(this)))
                 throw new AssetPairNotSupportedException(context.Asset.ShortCode, this);
@@ -337,7 +337,7 @@ namespace Prime.Plugins.Services.BitMex
             var remoteCode = context.Asset.ToRemoteCode(this);
             var r = await api.GetWalletHistoryAsync(remoteCode).ConfigureAwait(false);
 
-            var history = new List<WithdrawalHistoryEntry>();
+            var history = new WithdrawalHistory(this);
 
             foreach (var rHistory in r.Where(x => x.transactType.Equals("Withdrawal", StringComparison.OrdinalIgnoreCase)))
             {

@@ -26,8 +26,8 @@ namespace Prime.Plugins.Services.Bittrex
             var api = ApiProvider.GetApi(context);
             var remotePair = context.Pair.ToTicker(this);
 
-            var r = context.IsSell ? 
-                await api.GetMarketSellLimit(remotePair, context.Quantity, context.Rate).ConfigureAwait(false) : 
+            var r = context.IsSell ?
+                await api.GetMarketSellLimit(remotePair, context.Quantity, context.Rate).ConfigureAwait(false) :
                 await api.GetMarketBuyLimit(remotePair, context.Quantity, context.Rate).ConfigureAwait(false);
 
             CheckResponseErrors(r);
@@ -46,10 +46,12 @@ namespace Prime.Plugins.Services.Bittrex
             var orders = new TradeOrders(Network);
             foreach (var order in r.result)
             {
-                orders.Add(new TradeOrder(order.OrderUuid, Network, order.Exchange.ToAssetPair(this), GetTradeOrderType(order.Type), order.Price)
+                var pair = order.Exchange.ToAssetPair(this);
+                orders.Add(new TradeOrder(order.OrderUuid, Network, pair, GetTradeOrderType(order.Type), order.Price)
                 {
                     Quantity = order.Quantity,
-                    QuantityRemaining = order.QuantityRemaining
+                    QuantityRemaining = order.QuantityRemaining,
+                    PricePerUnit = new Money(order.PricePerUnit ?? 0, pair.Asset2)
                 });
             }
 
@@ -67,9 +69,12 @@ namespace Prime.Plugins.Services.Bittrex
             var orders = new TradeOrders(Network);
             foreach (var order in r.result)
             {
-                orders.Add(new TradeOrder(order.OrderUuid, Network, order.Exchange.ToAssetPair(this).Reversed, GetTradeOrderType(order.Type), order.Price)
+                var pair = order.Exchange.ToAssetPair(this).Reversed;
+                orders.Add(new TradeOrder(order.OrderUuid, Network, pair, GetTradeOrderType(order.Type), order.Price)
                 {
                     Quantity = order.Quantity,
+                    CommissionPaid = new Money(order.Commission, pair.Asset2),
+                    Closed = order.TimeStamp,
                     QuantityRemaining = order.QuantityRemaining
                 });
             }

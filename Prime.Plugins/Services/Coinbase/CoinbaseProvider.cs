@@ -11,7 +11,7 @@ using OrderBook = Prime.Common.OrderBook;
 namespace Prime.Plugins.Services.Coinbase
 {
     // https://developers.coinbase.com/api/v2
-    public class CoinbaseProvider : IBalanceProvider, IOrderBookProvider, IOhlcProvider, IPublicPricingProvider, IAssetPairsProvider, IDepositProvider
+    public partial class CoinbaseProvider : IBalanceProvider, IOrderBookProvider, IOhlcProvider, IPublicPricingProvider, IAssetPairsProvider, IDepositProvider
     {
         private static readonly ObjectId IdHash = "prime:coinbase".GetObjectIdHashCode();
 
@@ -37,7 +37,7 @@ namespace Prime.Plugins.Services.Coinbase
         // https://developers.coinbase.com/api/v2#rate-limiting
         private static readonly IRateLimiter Limiter = new PerHourRateLimiter(10000, 1);
         public IRateLimiter RateLimiter => Limiter;
-        
+
         public bool CanGenerateDepositAddress => true;
         public bool CanPeekDepositAddress => true;
         public ApiConfiguration GetApiConfiguration => ApiConfiguration.Standard2;
@@ -69,7 +69,6 @@ namespace Prime.Plugins.Services.Coinbase
 
             return new MarketPrices(price);
         }
-
 
         public async Task<AssetPairs> GetAssetPairsAsync(NetworkProviderContext context)
         {
@@ -180,7 +179,7 @@ namespace Prime.Plugins.Services.Coinbase
 
                 foreach (var rAddress in r.data)
                 {
-                    if(string.IsNullOrWhiteSpace(rAddress.address))
+                    if (string.IsNullOrWhiteSpace(rAddress.address))
                         continue;
 
                     addresses.Add(new WalletAddress(this, kvp.Key.ToAsset(this))
@@ -218,9 +217,9 @@ namespace Prime.Plugins.Services.Coinbase
 
             var r = await api.GetProductOrderBookAsync(pairCode, OrderBookDepthLevel.FullNonAggregated).ConfigureAwait(false);
 
-            var bids = context.MaxRecordsCount == Int32.MaxValue 
+            var bids = context.MaxRecordsCount == Int32.MaxValue
                 ? r.bids.Take(recordsLimit).ToArray()
-                : r.bids.Take(context.MaxRecordsCount).ToArray() ;
+                : r.bids.Take(context.MaxRecordsCount).ToArray();
             var asks = context.MaxRecordsCount == Int32.MaxValue
                 ? r.asks.Take(recordsLimit).ToArray()
                 : r.asks.Take(context.MaxRecordsCount).ToArray();
@@ -238,7 +237,7 @@ namespace Prime.Plugins.Services.Coinbase
 
         private (decimal Price, decimal Size) ConvertToOrderBookRecord(string[] data)
         {
-            if(!decimal.TryParse(data[0], out var price) || !decimal.TryParse(data[1], out var size))
+            if (!decimal.TryParse(data[0], out var price) || !decimal.TryParse(data[1], out var size))
                 throw new ApiResponseException("API returned incorrect format of price data", this);
 
             return (price, size);

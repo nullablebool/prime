@@ -22,6 +22,7 @@ namespace Prime.Plugins.Services.Kraken
 
         internal class BalancesResponse : BaseResponse<Dictionary<string, decimal>> { }
 
+        internal class AssetsResponse : BaseResponse<Dictionary<string, Asset>> { }
         internal class AssetPairsResponse : BaseResponse<Dictionary<string, AssetPairResponse>> { }
 
         internal class TickersInformationResponse : BaseResponse<Dictionary<string, TickerInformationResponse>> { }
@@ -33,6 +34,10 @@ namespace Prime.Plugins.Services.Kraken
         internal class OrderBookResponse : BaseResponse<Dictionary<string, OrderBookRecordResponse>> { }
 
         internal class TimeResponse : BaseResponse<TimeDataResponse> { }
+
+        internal class LedgersInfoResponse : BaseResponse<LedgersInfo> { }
+
+        internal class TradeHistoryResponse : BaseResponse<TradesHistory> { }
 
         internal class TimeDataResponse
         {
@@ -133,5 +138,61 @@ namespace Prime.Plugins.Services.Kraken
             [JsonProperty("address-setup-fee")]
             public decimal address_setup_fee;
         }
+
+        internal class LedgersInfo
+        {
+            public int count;
+            public Dictionary<string, LedgerInfo> ledger;
+        }
+
+        internal class LedgerInfo
+        {
+            public string refid;
+            public double time;
+            public string type;
+            public string aclass;
+            public string asset;
+            public decimal amount;
+            public decimal fee;
+            public decimal balance;
+        }
+
+        internal class TradesHistory
+        {
+            public int count;
+            public Dictionary<string, TradeInfo> trades;
+        }
+
+        internal class TradeInfo
+        {
+            public string ordertxid;
+            public string pair;            
+            public double time;
+            public string type;
+            public string ordertype;            
+            public decimal price;            
+            public decimal cost;
+            public decimal fee;
+            public decimal vol;
+            public decimal margin;
+            public string misc;
+            public string posstatus;
+            public decimal? cprice;
+            public decimal? ccost;
+            public decimal? cfee;
+            public decimal? cvol;
+            public decimal? cmargin;
+            public decimal? net;
+            public string[] trades;
+        }
+
+        internal class Asset
+        {
+            public string altname;
+            public string aclass;
+            public int decimals;
+            public int displaydecimals;
+        }
+
     }
 }

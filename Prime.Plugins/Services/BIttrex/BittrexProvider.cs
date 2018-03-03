@@ -130,7 +130,7 @@ namespace Prime.Plugins.Services.Bittrex
                 {
                     PriceStatistics = new PriceStatistics(Network, pair.Asset2, e.Ask, e.Bid, e.Low, e.High),
                     Volume = new NetworkPairVolume(Network, pair, e.BaseVolume, e.Volume)
-                }.Reversed);
+                });
             }
 
             return prices;
@@ -142,7 +142,7 @@ namespace Prime.Plugins.Services.Bittrex
                 return await GetPriceAsync(context).ConfigureAwait(false);
 
             return await GetPricesAsync(context).ConfigureAwait(false);
-        }
+        }        
 
         public bool DoesMultiplePairs => false;
 

@@ -74,17 +74,25 @@ namespace Prime.Common
         {
             return AsyncContext.Run(() => GetOrderBookAsync(provider, context));
         }
-        public static ApiResponse<List<DepositHistoryEntry>> GetDepositHistory(IDepositHistoryProvider provider, DepositHistoryContext context)
+
+        public static ApiResponse<DepositHistory> GetDepositHistory(IDepositHistoryProvider provider, DepositHistoryContext context)
         {
             return AsyncContext.Run(() => GetDepositHistoryAsync(provider, context));
         }
-        public static ApiResponse<List<DepositHistoryEntry>> GetWithdrawHistory(IDepositHistoryProvider provider, DepositHistoryContext context)
+
+        public static ApiResponse<WithdrawalHistory> GetWithdrawHistory(IWithdrawalHistoryProvider provider, WithdrawalHistoryContext context)
         {
-            return AsyncContext.Run(() => GetDepositHistoryAsync(provider, context));
+            return AsyncContext.Run(() => GetWithdrawHistoryAsync(provider, context));
         }
+
         public static ApiResponse<TradeOrders> GetPrivateTradeHistory(IPrivateTradeHistoryProvider provider, TradeHistoryContext context)
         {
             return AsyncContext.Run(() => GetPrivateTradeHistoryAsync(provider, context));
+        }
+
+        public static ApiResponse<MarketPrices> GetPricingBulk(IPublicPricingBulkProvider provider, NetworkProviderContext context)
+        {
+            return AsyncContext.Run(() => GetPricingBulkAsync(provider, context));
         }
     }
 }

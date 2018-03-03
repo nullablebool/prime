@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,11 +10,14 @@ using System.Threading.Tasks;
 
 namespace Prime.Common
 {
-    public abstract class BaseAuthenticator
+    public abstract partial class BaseAuthenticator
     {
-        protected BaseAuthenticator(ApiKey apiKey)
+        private Nonce _nonce;
+
+        protected BaseAuthenticator(ApiKey apiKey, long? nonceSeed = null)
         {
             ApiKey = apiKey;
+            _nonce = new Nonce(nonceSeed);
         }
 
         public readonly ApiKey ApiKey;
@@ -22,19 +26,21 @@ namespace Prime.Common
 
         private static readonly long ArbTickEpoch = new DateTime(1990, 1, 1).Ticks;
 
+        [Obsolete("This does not gaurantee a unique nonce. Better to use the instance method GetNonce() to insure an incremental variable. ")]
         public static long GetLongNonce()
         {
             return DateTime.UtcNow.Ticks;
         }
 
+        [Obsolete("Doesn't return a true Epoch. This does not gaurantee a unique nonce. Better to use the instance method GetNonce() to insure an incremental variable. ")]
         public static long GetUnixEpochNonce()
         {
-            return DateTime.UtcNow.Ticks - ArbTickEpoch;
+            return GetLongNonce() - ArbTickEpoch;
         }
 
         protected virtual long GetNonce()
         {
-            return GetLongNonce();
+            return _nonce.Next;
         }
 
         #endregion
@@ -236,6 +242,35 @@ namespace Prime.Common
         public Task GetRequestModifierAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return Task.Run(() => RequestModify(request, cancellationToken), cancellationToken);
+        }
+
+        public class Nonce
+        {
+            private long _nonce;
+            private long _increment = 1;
+
+            /// <summary>
+            /// Creates a new thread-safe Nonce.
+            /// </summary>
+            /// <param name="seed">The ininital value to increment from. Default: Epoch Unix MS</param>
+            public Nonce(long? seed = null, long increment = 1)
+            {
+                _nonce = seed ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                _increment = increment;
+            }
+
+            public long Next { get { return Interlocked.Add(ref _nonce, _increment); } }
+
+            public static Nonce Epoch() => new Nonce(SeedValues.Epoch());
+            public static Nonce EpochMs() => new Nonce(SeedValues.EpochMs());
+            public static Nonce UtcTicks() => new Nonce(SeedValues.UtcTicks());
+
+            public static class SeedValues
+            {
+                public static long Epoch() => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                public static long EpochMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                public static long UtcTicks() => DateTime.UtcNow.Ticks;
+            }
         }
     }
 }

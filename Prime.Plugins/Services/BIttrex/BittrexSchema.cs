@@ -105,7 +105,7 @@ namespace Prime.Plugins.Services.Bittrex
         {
             public string Type => OrderType;
             public string OrderType;
-            public string TimeStamp;
+            public DateTime TimeStamp;
             public decimal Commission;
         }
 

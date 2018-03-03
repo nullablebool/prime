@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Api\Request\Authenticator\Nonce.cs" />
     <Compile Remove="Asset\Misc\IAssetPairConverter.cs" />
     <Compile Remove="Exchange\ExchangeCommand.cs" />
     <Compile Remove="Messages\RenewingSubscriptionsListener.cs" />

@@ -15,9 +15,7 @@ namespace Prime.Plugins.Services.Kraken
         {
             var api = ApiProvider.GetApi(context);
 
-            var body = CreateKrakenBody();
-
-            var r = await api.GetBalancesAsync(body).ConfigureAwait(false);
+            var r = await api.GetBalancesAsync().ConfigureAwait(false);
 
             CheckResponseErrors(r);
 
