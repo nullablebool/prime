@@ -34,13 +34,19 @@ namespace Prime.Tests.Providers
         [TestMethod]
         public override void TestPlaceOrderLimit()
         {
-            base.TestPlaceOrderLimit("XRP_USD".ToAssetPairRaw(), false, 34m, new Money(100000m, "USD".ToAssetRaw()));
+            base.TestPlaceOrderLimit("XRP_USD".ToAssetPairRaw(), true, 34m, new Money(0.1m, "USD".ToAssetRaw()));
         }
 
         [TestMethod]
         public override void TestGetTradeOrderStatus()
         {
-            base.TestGetTradeOrderStatus("6313352603");
+            base.TestGetTradeOrderStatus("876236022465");
+        }
+
+        [TestMethod]
+        public override void TestGetMarketFromOrder()
+        {
+            base.TestGetMarketFromOrder("8083100177");
         }
 
         [TestMethod]

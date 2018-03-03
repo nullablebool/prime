@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Prime.Common;
+using Prime.Common.Api.Request.Response;
 
 namespace Prime.Plugins.Services.Bitfinex
 {
@@ -19,7 +20,6 @@ namespace Prime.Plugins.Services.Bitfinex
             var body = new BitfinexSchema.NewOrderRequest.Descriptor
             {
                 symbol = context.Pair.ToTicker(this),
-                type = "exchange market",
                 amount = context.Quantity.ToString(CultureInfo.InvariantCulture),
                 price = context.Rate.ToDecimalValue().ToString(CultureInfo.InvariantCulture),
                 side = context.IsSell ? "sell" : "buy"
@@ -34,13 +34,16 @@ namespace Prime.Plugins.Services.Bitfinex
             return new PlacedOrderLimitResponse(r.order_id.ToString());
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
 
+            if (!long.TryParse(context.RemoteGroupId, out var remoteId))
+                throw new ApiBaseException("Order remote id should be of a number type", this);
+
             var body = new BitfinexSchema.OrderStatusRequest.Descriptor()
             {
-                order_id = long.Parse(context.RemoteGroupId)
+                order_id = remoteId
             };
 
             var rRaw = await api.GetOrderStatusAsync(body).ConfigureAwait(false);
@@ -49,18 +52,30 @@ namespace Prime.Plugins.Services.Bitfinex
 
             var r = rRaw.GetContent();
 
-            return new TradeOrderStatus(r.id.ToString(), r.is_live, r.is_cancelled)
+            var isBuy = r.side.Equals("buy", StringComparison.OrdinalIgnoreCase);
+
+            return new TradeOrderStatus(r.id.ToString(), isBuy, r.is_live, r.is_cancelled)
             {
+                Market = r.symbol.ToAssetPair(this, 3),
                 Rate = r.type.Equals("exchange limit", StringComparison.OrdinalIgnoreCase) ? r.price : r.avg_execution_price,
                 AmountInitial = r.original_amount,
                 AmountRemaining = r.remaining_amount
             };
         }
 
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
         public MinimumTradeVolume[] MinimumTradeVolume { get; } =
         {
             new MinimumTradeVolume(new AssetPair("XRP", "USD"), new Money(10, Asset.Usd), new Money(12, Asset.Xrp))
         };
+
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(false, CanGetOrderMarket.WithinOrderStatus)
+        {
+            // Order History limited to last 3 days and 1 request per minute.
+            MarketByOrderRequestAffectsRateLimiter = true
+        };
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
 
         public async Task<BalanceResults> GetBalancesAsync(NetworkProviderPrivateContext context)
         {
@@ -85,9 +100,9 @@ namespace Prime.Plugins.Services.Bitfinex
             return balances;
         }
 
-        private static readonly Lazy<Dictionary<Asset, string>> WithdrawalAssetsToTypes = new Lazy<Dictionary<Asset,string>>(() => new Dictionary<Asset, string>()
+        private static readonly Lazy<Dictionary<Asset, string>> WithdrawalAssetsToTypes = new Lazy<Dictionary<Asset, string>>(() => new Dictionary<Asset, string>()
         {
-            // TODO: Bitfinex - clarify keys.
+            // AY: TODO: Bitfinex - clarify keys.
             { "BTC".ToAssetRaw(), "bitcoin" },
             { "LTC".ToAssetRaw(), "litecoin" },
             { "ETH".ToAssetRaw(), "ethereum" },
@@ -113,7 +128,7 @@ namespace Prime.Plugins.Services.Bitfinex
 
             var body = new BitfinexSchema.WithdrawalRequest.Descriptor();
 
-            if(!WithdrawalAssetsToTypes.Value.TryGetValue(context.Amount.Asset, out var withdrawalType))
+            if (!WithdrawalAssetsToTypes.Value.TryGetValue(context.Amount.Asset, out var withdrawalType))
                 throw new ApiResponseException("Withdrawal of specified asset is not supported", this);
 
             body.withdraw_type = withdrawalType;
@@ -127,10 +142,10 @@ namespace Prime.Plugins.Services.Bitfinex
             CheckBitfinexResponseErrors(rRaw);
 
             var r = rRaw.GetContent().FirstOrDefault();
-            if(r == null)
+            if (r == null)
                 throw new ApiResponseException("No result return after withdrawal operation", this);
 
-            if(r.status.Equals("error", StringComparison.InvariantCultureIgnoreCase))
+            if (r.status.Equals("error", StringComparison.InvariantCultureIgnoreCase))
                 throw new ApiResponseException(r.message, this);
 
             return new WithdrawalPlacementResult()

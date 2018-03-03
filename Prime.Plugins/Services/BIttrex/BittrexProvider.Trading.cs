@@ -7,10 +7,16 @@ using Prime.Common;
 
 namespace Prime.Plugins.Services.Bittrex
 {
-    public partial class BittrexProvider : IOrderLimitProvider
+    public partial class BittrexProvider : IOrderLimitProvider, IWithdrawalPlacementProvider
     {
         // TODO: AY: BittrexProvider, review MinimumTradeVolume.
+
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
         public MinimumTradeVolume[] MinimumTradeVolume { get; } = { new MinimumTradeVolume() { MinimumSell = 0.011m, MinimumBuy = 0.011m } }; //50K Satoshi /4 USD
+
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(false, CanGetOrderMarket.WithinOrderStatus);
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
 
         private TradeOrderType GetTradeOrderType(string tradeOrderTypeSchema)
         {
@@ -26,9 +32,12 @@ namespace Prime.Plugins.Services.Bittrex
             var api = ApiProvider.GetApi(context);
             var remotePair = context.Pair.ToTicker(this);
 
+            var quantity = context.Quantity.ToDecimalValue();
+            var rate = context.Rate.ToDecimalValue();
+
             var r = context.IsSell ?
-                await api.GetMarketSellLimit(remotePair, context.Quantity, context.Rate).ConfigureAwait(false) :
-                await api.GetMarketBuyLimit(remotePair, context.Quantity, context.Rate).ConfigureAwait(false);
+                await api.GetMarketSellLimit(remotePair, quantity, rate).ConfigureAwait(false) :
+                await api.GetMarketBuyLimit(remotePair, quantity, rate).ConfigureAwait(false);
 
             CheckResponseErrors(r);
 
@@ -82,7 +91,7 @@ namespace Prime.Plugins.Services.Bittrex
             return orders;
         }
 
-        public async Task<TradeOrder> GetOrderDetails(RemoteIdContext context)
+        public async Task<TradeOrder> GetOrderDetails(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
             var r = await api.GetAccountOrder(context.RemoteGroupId).ConfigureAwait(false);
@@ -97,17 +106,42 @@ namespace Prime.Plugins.Services.Bittrex
             };
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
             var r = await api.GetAccountOrder(context.RemoteGroupId).ConfigureAwait(false);
 
             CheckResponseErrors(r);
 
-            return r?.result == null ? new TradeOrderStatus() : new TradeOrderStatus(r.result.OrderUuid, r.result.IsOpen, r.result.CancelInitiated)
+            var order = r.result;
+
+            var isBuy = order.Type.IndexOf("buy", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            return new TradeOrderStatus(order.OrderUuid, isBuy, order.IsOpen, order.CancelInitiated)
             {
-                AmountInitial = r.result.Quantity,
-                AmountRemaining = r.result.QuantityRemaining
+                Market = order.Exchange.ToAssetPair(this),
+                Rate = order.Limit,
+                AmountInitial = order.Quantity,
+                AmountRemaining = order.QuantityRemaining
+            };
+        }
+
+        public bool IsWithdrawalFeeIncluded => true;
+        public async Task<WithdrawalPlacementResult> PlaceWithdrawalAsync(WithdrawalPlacementContext context)
+        {
+            var api = ApiProvider.GetApi(context);
+
+            var r = context.HasDescription
+                ? await api.Withdraw(context.Amount.Asset.ToRemoteCode(this), context.Amount.ToDecimalValue(),
+                    context.Address.Address, context.Description).ConfigureAwait(false)
+                : await api.Withdraw(context.Amount.Asset.ToRemoteCode(this), context.Amount.ToDecimalValue(),
+                    context.Address.Address).ConfigureAwait(false);
+
+            CheckResponseErrors(r);
+
+            return new WithdrawalPlacementResult()
+            {
+                WithdrawalRemoteId = r.result.uuid
             };
         }
     }

@@ -63,15 +63,17 @@ namespace Prime.Tests.Providers
         [TestMethod]
         public override void TestPlaceOrderLimit()
         {
-            // TODO: AY: real money tests - Bittrex.
-            base.TestPlaceOrderLimit("BTC_XRP".ToAssetPairRaw(), false, 2, new Money(1m, Asset.Xrp));
+            // Reliable test for selling.
+            base.TestPlaceOrderLimit("BTC_XRP".ToAssetPairRaw(), false, new Money(3m, Asset.Xrp), new Money(1m, Asset.Btc));
+
+            // Reliable test for buying.
+            base.TestPlaceOrderLimit("BTC_XRP".ToAssetPairRaw(), true, new Money(5000m, Asset.Xrp), new Money(0.00000010m, Asset.Btc));
         }
 
         [TestMethod]
         public override void TestGetTradeOrderStatus()
         {
-            // TODO: AY: real money tests - Bittrex.
-            base.TestGetTradeOrderStatus("remoteid");
+            base.TestGetTradeOrderStatus("1c92173b-c6a2-4118-9ff0-b78bd775e0a8");
         }
 
         [TestMethod]
@@ -98,6 +100,12 @@ namespace Prime.Tests.Providers
         public override void TestGetOrderBook()
         {
             base.TestGetOrderBook("BTC_XRP".ToAssetPairRaw(), false);
+        }
+
+        [TestMethod]
+        public override void TestPlaceWithdrawal()
+        {
+            base.TestPlaceWithdrawal(new WalletAddress("13zPXAsFofXXkczMg9bB6x1L9BWK9Yiawr"), new Money(0.00004911m, Asset.Btc));
         }
     }
 }

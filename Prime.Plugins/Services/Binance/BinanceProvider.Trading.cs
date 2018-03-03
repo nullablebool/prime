@@ -55,12 +55,12 @@ namespace Prime.Plugins.Services.Binance
             return new PlacedOrderLimitResponse(r.orderId.ToString());
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
+            if(context.Market == null)
+                throw new MarketNotSpecifiedException(this);
+
             var api = ApiProvider.GetApi(context);
-            
-            if(!context.HasMarket)
-                throw new ApiResponseException("Market should be specified when querying order status", this);
 
             if(!long.TryParse(context.RemoteGroupId, out var orderId))
                 throw new ApiResponseException("Incorrect order ID specified - must be a number", this);
@@ -72,19 +72,39 @@ namespace Prime.Plugins.Services.Binance
 
             var isCancelRequested = r.status.Equals("pending_cancel", StringComparison.OrdinalIgnoreCase);
             var isOpen = r.status.Equals("new", StringComparison.OrdinalIgnoreCase);
-            
-            return new TradeOrderStatus(r.orderId.ToString(), isOpen, isCancelRequested)
+
+            var isBuy = r.side.Equals("buy", StringComparison.OrdinalIgnoreCase);
+
+            return new TradeOrderStatus(r.orderId.ToString(), isBuy, isOpen, isCancelRequested)
             {
                 Rate = r.price,
-                AmountInitial = new Money(r.origQty, context.Market.Asset1),
-                AmountRemaining = new Money(r.origQty - r.executedQty, context.Market.Asset1),
+                AmountInitial = r.origQty,
+                AmountRemaining = r.origQty - r.executedQty
             };
+        }
+
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
+        [Obsolete("To be implemented soon.")]
+        public async Task GetDepositHistoryAsync(NetworkProviderPrivateContext context)
+        {
+            var api = ApiProvider.GetApi(context);
+
+            var rRaw = await api.GetDepositHistoryAsync().ConfigureAwait(false);
+
+            throw new NotImplementedException();
         }
 
         public MinimumTradeVolume[] MinimumTradeVolume => throw new NotImplementedException();
 
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(true, CanGetOrderMarket.FromNowhere)
+        {
+            MarketByOrderRequestAffectsRateLimiter = true
+        };
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
+
         // When 22 XRP is submitted - 21.75 will be sent.
-        public bool IsWithdrawalFeeIncluded => false;
+        public bool IsWithdrawalFeeIncluded => true;
 
         public async Task<WithdrawalPlacementResult> PlaceWithdrawalAsync(WithdrawalPlacementContext context)
         {

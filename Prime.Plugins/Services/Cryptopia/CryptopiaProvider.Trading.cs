@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Prime.Common;
 using Prime.Common.Api.Request.Response;
+using RestEase;
 
 namespace Prime.Plugins.Services.Cryptopia
 {
@@ -32,11 +33,11 @@ namespace Prime.Plugins.Services.Cryptopia
             return new PlacedOrderLimitResponse(r.Data.OrderId.ToString());
         }
 
-        private async Task<IEnumerable<TradeOrderStatus>> GetOpenOrdersAsync(RemoteIdContext context)
+        private async Task<IEnumerable<TradeOrderStatus>> GetOpenOrdersAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
 
-            var body = new CryptopiaSchema.GetOpenOrdersRequest
+            var body = new CryptopiaSchema.GetOpenOrdersRequest()
             {
                 Count = 1000,
                 Market = context.Market.ToTicker(this, "/")
@@ -47,11 +48,17 @@ namespace Prime.Plugins.Services.Cryptopia
             CheckCryptopiaResponseErrors(rRaw);
 
             var r = rRaw.GetContent();
-
-            return r.Data.Select(x => new TradeOrderStatus(x.OrderId.ToString(), true, false));
+            
+            return r.Data.Select(x => new TradeOrderStatus(x.OrderId.ToString(), x.Type.Equals("buy", StringComparison.OrdinalIgnoreCase), true, false)
+            {
+                Market = x.Market.ToAssetPair(this, '/'),
+                Rate = x.Rate,
+                AmountInitial = x.Amount,
+                AmountRemaining = x.Remaining
+            });
         }
 
-        private async Task<IEnumerable<TradeOrderStatus>> GetTradeHistoryAsync(RemoteIdContext context)
+        private async Task<IEnumerable<TradeOrderStatus>> GetTradeHistoryAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
 
@@ -67,24 +74,35 @@ namespace Prime.Plugins.Services.Cryptopia
 
             var r = rRaw.GetContent();
 
-            return r.Data.Select(x => new TradeOrderStatus(x.TradeId.ToString(), false, false));
+            return r.Data.Select(x => new TradeOrderStatus(x.TradeId.ToString(), x.Type.Equals("buy", StringComparison.OrdinalIgnoreCase), false, false)
+            {
+                Market = x.Market.ToAssetPair(this, '/'),
+                Rate = x.Rate,
+                AmountInitial = x.Amount
+            });
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
             var openOrders = await GetOpenOrdersAsync(context).ConfigureAwait(false);
 
             var order = openOrders.FirstOrDefault(x => x.RemoteOrderId.Equals(context.RemoteGroupId));
 
-            Money? amountInitial;
-            Money? amountRemaining;
+            decimal? amountInitial;
+            decimal? amountRemaining;
+            decimal? rate;
+            AssetPair market;
 
             var isOpen = true;
+            var isBuy = false;
 
             if (order != null)
             {
                 amountInitial = order.AmountInitial;
                 amountRemaining = order.AmountRemaining;
+                rate = order.Rate;
+                isBuy = order.IsBuy;
+                market = order.Market;
             }
             else
             {
@@ -97,19 +115,29 @@ namespace Prime.Plugins.Services.Cryptopia
 
                 amountInitial = trade.AmountInitial;
                 amountRemaining = trade.AmountRemaining;
+                rate = trade.Rate;
+                isBuy = trade.IsBuy;
 
                 isOpen = false;
+                market = trade.Market;
             }
 
-            return new TradeOrderStatus(context.RemoteGroupId, isOpen, false)
+            return new TradeOrderStatus(context.RemoteGroupId, isBuy, isOpen, false)
             {
+                Market = market,
+                Rate = rate,
                 AmountInitial = amountInitial,
                 AmountRemaining = amountRemaining
             };
         }
 
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
         // TODO: AY: find out MinimumTradeVolume in Cryptopia.
         public MinimumTradeVolume[] MinimumTradeVolume => throw new NotImplementedException();
+
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(false, CanGetOrderMarket.WithinOrderStatus);
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
 
         public async Task<BalanceResults> GetBalancesAsync(NetworkProviderPrivateContext context)
         {

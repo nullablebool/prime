@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Prime.Plugins.Services.Binance
 {
-    // https://www.binance.com/restapipub.html
+    // https://github.com/binance-exchange/binance-official-api-docs/blob/master/rest-api.md
     /// <author email="yasko.alexander@gmail.com">Alexander Yasko</author>
     public partial class BinanceProvider : IOrderBookProvider, IOhlcProvider, IPublicPricingProvider, IAssetPairsProvider, IDepositProvider
     {
@@ -20,8 +20,6 @@ namespace Prime.Plugins.Services.Binance
 
         private static readonly IReadOnlyList<Asset> SuspendedDeposit = "BTM,HCC,LLT,BTG".ToAssetsCsvRaw();
         private static readonly IReadOnlyList<Asset> SuspendedWithdrawal = "BTG".ToAssetsCsvRaw();
-
-        private static readonly AssetCodeConverterDictionary _assetCodeConverter = new AssetCodeConverterDictionary(new Dictionary<string, string> { { "BCC", "BCH" } });
 
         private RestApiClientProvider<IBinanceApi> ApiProvider { get; }
 
@@ -39,6 +37,9 @@ namespace Prime.Plugins.Services.Binance
         
         public bool CanGenerateDepositAddress => false;
         public bool CanPeekDepositAddress => false;
+
+        private static readonly BinanceCodeConverter AssetCodeConverter = new BinanceCodeConverter();
+        public IAssetCodeConverter GetAssetCodeConverter() => AssetCodeConverter;
 
         public Task<TransferSuspensions> GetTransferSuspensionsAsync(NetworkProviderContext context)
         {
@@ -126,12 +127,6 @@ namespace Prime.Plugins.Services.Binance
                     throw new ArgumentOutOfRangeException(nameof(resolution), resolution, null);
             }
         }
-
-        public IAssetCodeConverter GetAssetCodeConverter()
-        {
-            return _assetCodeConverter;
-        }
-
 
         private static readonly PricingFeatures StaticPricingFeatures = new PricingFeatures()
         {

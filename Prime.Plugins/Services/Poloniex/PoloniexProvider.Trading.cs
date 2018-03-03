@@ -55,7 +55,7 @@ namespace Prime.Plugins.Services.Poloniex
             return new PlacedOrderLimitResponse(r.orderNumber, r.resultingTrades.Select(x=>x.tradeID));
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
             var body = CreatePoloniexBody(PoloniexBodyType.OrderStatus);
@@ -63,7 +63,7 @@ namespace Prime.Plugins.Services.Poloniex
 
             var r = await api.GetOrderStatusAsync(body).ConfigureAwait(false);
             
-            // TODO: AY: implement - Poloniex.
+            // TODO: AY: implement, use all markets - Poloniex.
 
             return new TradeOrderStatus()
             {
@@ -71,6 +71,11 @@ namespace Prime.Plugins.Services.Poloniex
             };
         }
 
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
         public MinimumTradeVolume[] MinimumTradeVolume => throw new NotImplementedException();
+
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(false, CanGetOrderMarket.WithinOrderStatus);
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
     }
 }

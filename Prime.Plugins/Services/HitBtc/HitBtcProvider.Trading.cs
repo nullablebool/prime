@@ -76,7 +76,7 @@ namespace Prime.Plugins.Services.HitBtc
             return new Dictionary<string, object>();
         }
 
-        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteIdContext context)
+        public async Task<TradeOrderStatus> GetOrderStatusAsync(RemoteMarketIdContext context)
         {
             var api = ApiProvider.GetApi(context);
 
@@ -87,15 +87,25 @@ namespace Prime.Plugins.Services.HitBtc
 
             var isOpen = r.status.Equals("new", StringComparison.OrdinalIgnoreCase);
             var isCancelRequested = r.status.Equals("new", StringComparison.OrdinalIgnoreCase);
-            
-            return new TradeOrderStatus(r.clientOrderId, isOpen, isCancelRequested)
+
+            var isBuy = r.side.Equals("buy", StringComparison.OrdinalIgnoreCase);
+
+            return new TradeOrderStatus(r.clientOrderId, isBuy, isOpen, isCancelRequested)
             {
                 Rate = r.price,
                 AmountInitial = r.quantity
             };
         }
 
+        public Task<OrderMarketResponse> GetMarketFromOrderAsync(RemoteIdContext context) => null;
+
         public MinimumTradeVolume[] MinimumTradeVolume => throw new NotImplementedException();
+
+        /// <summary>
+        /// CanGetOrderMarket.FromNowhere because order's market is non-parseable.
+        /// </summary>
+        private static readonly OrderLimitFeatures OrderFeatures = new OrderLimitFeatures(false, CanGetOrderMarket.FromNowhere);
+        public OrderLimitFeatures OrderLimitFeatures => OrderFeatures;
 
         // When 50 XRP are submitted, 49.491000 XRP will be received.
         public bool IsWithdrawalFeeIncluded => throw new NotImplementedException();

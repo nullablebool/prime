@@ -35,11 +35,11 @@ namespace Prime.Plugins.Services.Bittrex
         [Get("/public/getorderbook?market={currencyPair}&type=both")]
         Task<BittrexSchema.OrderBookResponse> GetOrderBookAsync([Path] string currencyPair);
 
-        [Get("/market/buylimit?market={currencyPair}&quantity={quantity}&rate={rate}")]
-        Task<BittrexSchema.UuidResponse> GetMarketBuyLimit([Path] string currencyPair, [Path] decimal quantity, [Path] decimal rate);
+        [Get("/market/buylimit")]
+        Task<BittrexSchema.UuidResponse> GetMarketBuyLimit([Query] string market, [Query] decimal quantity, [Query] decimal rate);
 
-        [Get("/market/selllimit?market={currencyPair}&quantity={quantity}&rate={rate}")]
-        Task<BittrexSchema.UuidResponse> GetMarketSellLimit([Path] string currencyPair, [Path] decimal quantity, [Path] decimal rate);
+        [Get("/market/selllimit")]
+        Task<BittrexSchema.UuidResponse> GetMarketSellLimit([Query] string market, [Query] decimal quantity, [Query] decimal rate);
 
         [Get("/market/cancel?uuid={uuid}")]
         Task<BittrexSchema.UuidResponse> GetMarketCancel([Path] string uuid);
@@ -64,5 +64,17 @@ namespace Prime.Plugins.Services.Bittrex
 
         [Get("/public/getcurrencies")]
         Task<BittrexSchema.GetCurrenciesResponse> GetCurrenciesAsync([Query] string currencyPair = null);
+        
+        /// <summary>
+        /// Used to withdraw funds from your account.
+        /// </summary>
+        /// <param name="currency">A string literal for the currency (i.e. BTC).</param>
+        /// <param name="quantity">The quantity of coins to withdraw.</param>
+        /// <param name="address">The address where to send the funds.</param>
+        /// <param name="paymentid">Used for CryptoNotes/BitShareX/Nxt optional field (memo/paymentid).</param>
+        /// <returns>Returns the withdrawal uuid.</returns>
+        [Get("/account/withdraw")]
+        Task<BittrexSchema.WithdrawalResponse> Withdraw([Query] string currency, [Query] decimal quantity, [Query] string address, [Query] string paymentid = null);
+
     }
 }

@@ -214,7 +214,7 @@ namespace Prime.Plugins.Services.BitMex
             var api = ApiProvider.GetApi(context);
             var addresses = new WalletAddresses();
 
-            // TODO: re-implement, incorrect implementation.
+            // TODO: AY: re-implement, incorrect implementation.
 
             foreach (var assetPair in Pairs)
             {
@@ -331,7 +331,7 @@ namespace Prime.Plugins.Services.BitMex
         public async Task<WithdrawalHistory> GetWithdrawalHistoryAsync(WithdrawalHistoryContext context)
         {
             if (!context.Asset.ToRemoteCode(this).Equals(Asset.Btc.ToRemoteCode(this)))
-                throw new AssetPairNotSupportedException(context.Asset.ShortCode, this);
+                throw new ApiBaseException($"{context.Asset.ShortCode} asset is not supported for querying withdrawal history", this);
 
             var api = ApiProvider.GetApi(context);
             var remoteCode = context.Asset.ToRemoteCode(this);
