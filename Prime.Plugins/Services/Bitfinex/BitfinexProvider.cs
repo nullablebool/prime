@@ -135,11 +135,7 @@ namespace Prime.Plugins.Services.Bitfinex
 
             var r = rRaw.GetContent();
 
-            return new MarketPrices(new MarketPrice(Network, context.Pair, r.last_price)
-            {
-                PriceStatistics = new PriceStatistics(Network, context.Pair.Asset2, r.ask, r.bid, r.low, r.high),
-                Volume = new NetworkPairVolume(Network, context.Pair, r.volume)
-            });
+            return new MarketPrices(TickerPresonseToMarketPair(context.Pair, r));
         }
 
         public async Task<OrderBook> GetOrderBookAsync(OrderBookContext context)

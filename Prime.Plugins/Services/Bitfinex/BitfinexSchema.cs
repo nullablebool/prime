@@ -31,7 +31,7 @@ namespace Prime.Plugins.Services.Bitfinex
 
         internal interface IClassDescriptor
         {
-             string ClassName { get; }
+            string ClassName { get; }
         }
 
         #endregion
@@ -181,13 +181,13 @@ namespace Prime.Plugins.Services.Bitfinex
                 exchange = "bitfinex";
             }
 
-            public string symbol; 
+            public string symbol;
             public string amount;
             public string price;
             public string exchange;
             public string side;
             public string type;
-            
+
             public bool is_hidden;
             public bool is_postonly;
             public int use_all_available;
@@ -217,6 +217,24 @@ namespace Prime.Plugins.Services.Bitfinex
             internal class Descriptor : WithdrawalRequest, IClassDescriptor
             {
                 public string ClassName => nameof(WithdrawalRequest);
+            }
+        }
+
+        internal class UserTradeHistoryRequest : BaseRequest
+        {
+            public string symbol;
+
+            internal class Descriptor : UserTradeHistoryRequest, IClassDescriptor
+            {
+                public string ClassName => nameof(UserTradeHistoryRequest);
+            }
+        }
+        
+        internal class DepositAndWithdrawalHistoryRequest : BaseRequest
+        {
+            internal class Descriptor : DepositAndWithdrawalHistoryRequest, IClassDescriptor
+            {
+                public string ClassName => nameof(DepositAndWithdrawalHistoryRequest);
             }
         }
 
@@ -250,5 +268,39 @@ namespace Prime.Plugins.Services.Bitfinex
         }
 
         #endregion
+
+        internal class MovementHistoryList : List<MovmentHistory> { }
+
+        internal class MovmentHistory
+        {
+             public long id;
+             public long txid;
+             public string currency;
+             public string method;
+             public string type;
+             public decimal amount;
+             public string description;
+             public string address;
+             public string status;
+             public decimal timestamp; //unix seconds
+             public decimal timestamp_created;
+             public decimal fee;
+        }
+
+        internal class TradeHistoryList : List<TradeHistory> { }
+
+        internal class TradeHistory
+        {
+             public decimal price;
+             public decimal amount;
+             public decimal timestamp;
+             public string exchange;
+             public string type;
+             public string fee_currency;
+             public decimal fee_amount;
+             public int tid;
+             public int order_id;
+
+        }
     }
 }

@@ -38,5 +38,11 @@ namespace Prime.Plugins.Services.Bitfinex
 
         [Post("/orders/hist")]
         Task<Response<BitfinexSchema.OrdersHistoryResponse>> GetOrdersHistoryAsync([Body(BodySerializationMethod.Serialized)] object body);
+
+        [Post("/history/movements")]
+        Task<Response<BitfinexSchema.MovementHistoryList>> GetDepositsAndWithdrawalHistoryAsync([Body(BodySerializationMethod.Serialized)] object body);
+
+        [Post("/mytrades")]
+        Task<Response<BitfinexSchema.TradeHistoryList>> GetUserTradesAsync([Body(BodySerializationMethod.Serialized)] object body);
     }
 }
